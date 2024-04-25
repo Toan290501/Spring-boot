@@ -4,7 +4,6 @@ package org.example.spring_boot.controller;
 import org.example.spring_boot.models.Products;
 import org.example.spring_boot.models.ResponseObject;
 import org.example.spring_boot.repositories.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +16,11 @@ import java.util.Optional;
 @RequestMapping(path = "/api/home")
 
 public class HomeController {
-    @Autowired
-    private ProductRepository repository;
+    private final ProductRepository repository;
+
+    public HomeController(ProductRepository repository) {
+        this.repository = repository;
+    }
 
     //get list products
     @GetMapping("/getAllProduct")
@@ -46,7 +48,7 @@ public class HomeController {
     @PostMapping("/insert")
     ResponseEntity<ResponseObject> insertProduct(@RequestBody Products newProduct) {
         List<Products> foundProduct = repository.findByName(newProduct.getName().trim());
-        if (foundProduct.size() > 0) {
+        if (!foundProduct.isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                     new ResponseObject("false", "cannot insert product with name (duplicate)" + newProduct.getName(), "")
             );
